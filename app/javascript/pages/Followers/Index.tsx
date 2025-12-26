@@ -1,5 +1,5 @@
 import { usePage } from "@inertiajs/react";
-import debounce from "lodash/debounce";
+import { debounce } from "lodash-es";
 import * as React from "react";
 import { cast } from "ts-safe-cast";
 
