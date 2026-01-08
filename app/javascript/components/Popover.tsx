@@ -34,14 +34,21 @@ export const Popover = ({
   const [open, setOpen] = React.useState(openProp ?? false);
   const ref = React.useRef<HTMLElement | null>(null);
 
+  // Anti-pattern
   if (openProp !== undefined && open !== openProp) setOpen(openProp);
 
   const toggle = (newOpen: boolean) => {
+    // Don't call when the state is the same?
+    if (newOpen === open) return;
+
     if (openProp === undefined) setOpen(newOpen);
     if (newOpen !== open) onToggle?.(newOpen);
   };
 
+  // Maybe a problem
   useOnOutsideClick([ref.current], () => toggle(false));
+
+  // Maybe a problem
   useGlobalEventListener("keydown", (evt) => {
     if (evt.key === "Escape") {
       toggle(false);
@@ -54,6 +61,7 @@ export const Popover = ({
     if (focusElement instanceof HTMLElement) focusElement.focus();
   }, [open]);
 
+  // Anti-pattern?
   const renderedTrigger = typeof trigger === "function" ? trigger(open) : trigger;
 
   return (
@@ -81,6 +89,8 @@ export const Popover = ({
 export const useDropdownPosition = (ref: React.RefObject<HTMLElement>) => {
   const [space, setSpace] = React.useState(0);
   const [maxWidth, setMaxWidth] = React.useState(0);
+
+  // Fires on every hook call?
   React.useEffect(() => {
     const calculateSpace = () => {
       if (!ref.current?.parentElement) return;
@@ -95,10 +105,11 @@ export const useDropdownPosition = (ref: React.RefObject<HTMLElement>) => {
       setMaxWidth(scrollContainer.clientWidth);
     };
     calculateSpace();
+    // Anti-pattern?
     window.addEventListener("resize", calculateSpace);
 
     return () => window.removeEventListener("resize", calculateSpace);
-  });
+  }, []);
 
   return {
     translate: `min(${space}px - 100% - var(--spacer-4), 0px)`,
